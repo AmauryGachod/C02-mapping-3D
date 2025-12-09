@@ -1,239 +1,135 @@
 # CO2 Mapping in 3D
 
-## 📋 Description
+Student project for real-time 3D mapping of CO2 concentration in indoor spaces using UWB positioning and environmental sensing.
 
-Projet étudiant de cartographie 3D en temps réel de la concentration en CO₂ dans un espace intérieur. Le système utilise un tag mobile équipé d'un capteur CO₂ et d'un module de positionnement UWB (Ultra-Wideband) pour mesurer et visualiser la distribution spatiale du CO₂.
+## Description
 
-## 🎯 Objectif
+This project combines Ultra-Wideband (UWB) positioning technology with CO2 sensing to create an interactive 3D visualization of indoor air quality. A mobile tag equipped with a CO2 sensor measures concentration levels while transmitting its position via Bluetooth to a computer for real-time visualization.
 
-Créer une cartographie interactive 3D de la qualité de l'air intérieur en combinant :
-- **Positionnement UWB** : Localisation précise du tag mobile dans l'espace
-- **Mesure CO₂** : Acquisition en temps réel de la concentration en CO₂
-- **Visualisation** : Dashboard Streamlit avec cartographie 3D interactive
+## Hardware
 
-## 🏗️ Architecture du Système
+### Mobile Tag
+- **UWB Module**: DW1000 (positioning)
+- **CO2 Sensor**: SenseAir S8 (NDIR measurement)
+- **Communication**: Bluetooth to computer
+- **Microcontroller**: Arduino/ESP32
 
-### Matériel
+### Fixed Anchors
+- **UWB Modules**: DW1000 (position references)
+- **Configuration**: Minimum 4 anchors for 3D positioning
 
-#### Tag Mobile
-- **Module UWB** : DW1000 (positionnement)
-- **Capteur CO₂** : SenseAir S8 (mesure NDIR)
-- **Communication** : Bluetooth vers ordinateur
-- **Microcontrôleur** : Arduino/ESP32
-
-#### Ancres Fixes
-- **Modules UWB** : DW1000 (références de position)
-- **Nombre** : Minimum 4 ancres pour positionnement 3D
-- **Configuration** : Positionnement fixe dans l'espace
-
-### Flux de Données
+## System Architecture
 
 ```
-Tag Mobile (DW1000 + SenseAir S8)
-    ↓ UWB ranging
-Ancres Fixes (DW1000)
-    ↓ Distances mesurées
-Tag Mobile
-    ↓ Bluetooth (distances + CO₂)
-Ordinateur
-    ↓ Traitement Python
-Dashboard Streamlit (Visualisation 3D)
+Mobile Tag (DW1000 + SenseAir S8)
+    ↓ UWB ranging with anchors
+    ↓ Distance measurements
+    ↓ Bluetooth transmission
+Computer
+    ↓ Python processing
+    ↓ 3D position calculation
+Streamlit Dashboard (3D visualization)
 ```
 
-## 📁 Structure du Projet
+## Project Structure
 
 ```
 C02-mapping-3D/
 ├── C02map/
-│   ├── anchor/              # Code pour les ancres UWB
-│   │   └── anchor.ino       # Firmware Arduino pour ancres
-│   ├── tag/                 # Code pour le tag mobile
-│   │   ├── tag.ino          # Firmware Arduino pour tag
-│   │   ├── link.cpp         # Gestion communication UWB
-│   │   └── link.h           # Header pour communication
-│   └── visualization/       # Module de visualisation Python
-│       ├── dashboard.py     # Dashboard Streamlit
-│       └── detection.py     # Module de détection et traitement
-├── .gitignore
+│   ├── anchor/              # Anchor firmware
+│   │   └── anchor.ino       # Arduino code for anchors
+│   ├── tag/                 # Tag firmware
+│   │   ├── tag.ino          # Arduino code for mobile tag
+│   │   ├── link.cpp         # UWB communication management
+│   │   └── link.h           # Communication header
+│   └── visualization/       # Python visualization
+│       ├── dashboard.py     # Streamlit dashboard
+│       └── detection.py     # Data processing module
 └── README.md
 ```
 
-## 🚀 Installation
+## Installation
 
-### Prérequis
-
+### Requirements
 - Python 3.8+
-- Arduino IDE ou PlatformIO
-- Bibliothèques Arduino pour DW1000
-- Bibliothèques Python (voir ci-dessous)
+- Arduino IDE
+- DW1000 Arduino library
 
-### Installation Python
+### Python Setup
 
 ```bash
-# Cloner le repository
 git clone https://github.com/AmauryGachod/C02-mapping-3D.git
 cd C02-mapping-3D
-
-# Installer les dépendances Python
 pip install -r requirements.txt
-# ou
-make install
 ```
 
-### Dépendances Python Principales
+### Key Dependencies
+- `streamlit` - Interactive dashboard
+- `numpy` - Numerical computations
+- `pandas` - Data handling
+- `plotly` - 3D visualization
+- `pyserial` - Bluetooth/Serial communication
+- `scipy` - Positioning algorithms
 
-- `streamlit` : Dashboard web interactif
-- `numpy` : Calculs numériques
-- `pandas` : Manipulation de données
-- `plotly` : Visualisation 3D interactive
-- `pyserial` : Communication Bluetooth/Serial
-- `scipy` : Algorithmes de triangulation
+## Configuration
 
-## 🔧 Configuration
+1. **Program Anchors**: Upload `C02map/anchor/anchor.ino` to each anchor with unique ID
+2. **Program Tag**: Upload `C02map/tag/tag.ino` to the mobile tag
+3. **Position Anchors**: Place anchors at known locations in the space
+4. **Update Coordinates**: Set anchor positions in Python code
 
-### 1. Programmation des Ancres
+## Usage
 
-```bash
-# Ouvrir C02map/anchor/anchor.ino dans Arduino IDE
-# Configurer l'ID unique de chaque ancre
-# Téléverser sur chaque module
-```
-
-### 2. Programmation du Tag
+### Launch Dashboard
 
 ```bash
-# Ouvrir C02map/tag/tag.ino dans Arduino IDE
-# Configurer les paramètres Bluetooth et capteurs
-# Téléverser sur le tag mobile
-```
-
-### 3. Calibration du Système
-
-- Positionner les ancres aux coins de la zone à cartographier
-- Noter les coordonnées exactes de chaque ancre
-- Mettre à jour les positions dans le code Python
-
-## 💻 Utilisation
-
-### Lancement du Dashboard
-
-```bash
-# Lancer le dashboard Streamlit
 streamlit run C02map/visualization/dashboard.py
 ```
 
-Le dashboard sera accessible à l'adresse `http://localhost:8501`
+Access at `http://localhost:8501`
 
-### Acquisition de Données
+### Data Acquisition
 
-1. **Démarrer les ancres** : Mettre sous tension les 4+ ancres fixes
-2. **Démarrer le tag** : Allumer le tag mobile
-3. **Connexion Bluetooth** : Connecter le tag à l'ordinateur via Bluetooth
-4. **Démarrage acquisition** : Lancer le dashboard et commencer la collecte
-5. **Déplacement** : Se déplacer dans la zone avec le tag mobile
+1. Power on the 4 fixed anchors
+2. Start the mobile tag
+3. Connect tag to computer via Bluetooth
+4. Launch dashboard to begin data collection
+5. Move through the space with the mobile tag
 
-### Visualisation
+### Visualization Features
 
-Le dashboard Streamlit affiche :
-- **Carte 3D interactive** : Visualisation en temps réel de la position et du CO₂
-- **Heatmap** : Cartographie de la concentration en CO₂
-- **Graphiques temporels** : Evolution des mesures dans le temps
-- **Statistiques** : Min, max, moyenne des concentrations
+- Real-time 3D position and CO2 display
+- CO2 concentration heatmap
+- Temporal evolution graphs
+- Basic statistics (min, max, average)
 
-## 🧮 Algorithmes
+## Technical Specifications
 
-### Triangulation UWB
+### SenseAir S8 Sensor
+- **Range**: 0-10000 ppm
+- **Accuracy**: ±40 ppm ±3% of reading
+- **Technology**: NDIR (Non-Dispersive Infrared)
+- **Interface**: UART
+- **Sampling**: ~1 Hz
 
-Utilisation de la **multilatération 3D** basée sur :
-- Mesures de distance (ToF - Time of Flight) entre tag et ancres
-- Algorithme de moindres carrés pour optimisation
-- Filtrage de Kalman pour réduction du bruit (optionnel)
+### DW1000 Module
+- **Standard**: IEEE 802.15.4-2011 UWB
+- **Frequency**: 3.5-6.5 GHz
+- **Interface**: SPI
+- **Range**: 50-200m (line of sight)
 
-### Interpolation Spatiale
+### Positioning
+- **Method**: 3D multilateration from distance measurements
+- **Accuracy**: ±10-30 cm (configuration dependent)
+- **Update Rate**: 10-100 Hz (configurable)
 
-Pour la cartographie continue du CO₂ :
-- Interpolation par krigeage ou splines
-- Agrégation temporelle des mesures
-- Lissage spatial pour visualisation
+## License
 
-## 📊 Spécifications Techniques
+Student project developed for educational purposes.
 
-### Performances
+## Resources
 
-- **Précision positionnement** : ±10-30 cm (selon configuration)
-- **Fréquence d'échantillonnage CO₂** : 1 Hz (SenseAir S8)
-- **Fréquence ranging UWB** : 10-100 Hz (configurable)
-- **Portée UWB** : 50-200m (ligne de vue)
-
-### Capteur SenseAir S8
-
-- **Plage de mesure** : 0-10000 ppm
-- **Précision** : ±40 ppm ±3% de la lecture
-- **Technologie** : NDIR (Non-Dispersive Infrared)
-- **Interface** : UART
-
-### Module DW1000
-
-- **Technologie** : IEEE 802.15.4-2011 UWB
-- **Bandes de fréquence** : 3.5-6.5 GHz
-- **Interface** : SPI
-
-## 🛠️ Développement
-
-### Branches Git
-
-- `master` : Branche principale stable
-- `develop` : Développement en cours
-
-### Tests
-
-```bash
-# Lancer les tests unitaires
-python -m pytest tests/
-```
-
-## 📝 TODO
-
-### Priorité Haute
-- [x] Protocole de communication UWB ↔ Tag
-- [x] Algorithme de triangulation 3D
-- [x] Lecture capteur CO₂ SenseAir S8
-- [x] Dashboard Streamlit avec visualisation 3D
-- [x] Communication Bluetooth Tag → PC
-
-### Priorité Moyenne
-- [ ] Gestion optimisée de la batterie
-- [ ] Calibration automatique des ancres
-- [ ] Export des données (CSV, JSON)
-- [ ] Mode enregistrement/replay
-
-### Priorité Basse
-- [ ] Boîtiers 3D pour ancres et tag
-- [ ] Interface web publique
-- [ ] Support multi-tags
-- [ ] Application mobile
-
-## 🤝 Contributeurs
-
-- **AmauryGachod** - Développement principal
-- **JeanCHDJdev** - Code Arduino et intégration matérielle
-- **emmaguetta** - Projet original
-
-## 📄 Licence
-
-Ce projet est développé dans le cadre d'un projet étudiant.
-
-## 🔗 Ressources
-
-### Documentation Matériel
-- [DW1000 User Manual](https://www.decawave.com/)
-- [SenseAir S8 Datasheet](https://senseair.com/)
-
-### Bibliothèques Utilisées
-- [DW1000 Arduino Library](https://github.com/thotro/arduino-dw1000)
+- [DW1000 Datasheet](https://www.decawave.com/)
+- [SenseAir S8 Documentation](https://senseair.com/)
 - [Streamlit Documentation](https://docs.streamlit.io/)
-- [Plotly Python Documentation](https://plotly.com/python/)
-
----
-
-**Note** : Ce projet est un système expérimental développé à des fins éducatives. Pour une utilisation en conditions réelles, une validation et calibration approfondies sont nécessaires.
+- [Plotly Python](https://plotly.com/python/)
